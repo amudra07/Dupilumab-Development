@@ -38,8 +38,27 @@ st.markdown("""
         background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
         border-right: 1px solid #334155;
     }
-    [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
-    [data-testid="stSidebar"] .stRadio > label { color: #94a3b8 !important; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] label { color: #e2e8f0 !important; }
+    [data-testid="stSidebar"] .stRadio > label {
+        color: #94a3b8 !important;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    [data-testid="stSidebar"] .stRadio [data-baseweb="radio"] label {
+        color: #cbd5e1 !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        padding: 4px 0 !important;
+    }
+    [data-testid="stSidebar"] .stRadio [data-baseweb="radio"] [aria-checked="true"] ~ label {
+        color: #f1f5f9 !important;
+        font-weight: 500 !important;
+    }
 
     /* Cards */
     .card {
@@ -216,13 +235,12 @@ with st.sidebar:
         label_visibility="visible"
     )
 
+    st.markdown("<br>" * 2, unsafe_allow_html=True)
     st.markdown("""
-    <div style='position:absolute; bottom:20px; left:16px; right:16px;'>
-        <div style='font-size:10px; color:#475569; line-height:1.6;'>
-            Data sources: FDA BLA 761055, Health Canada PM 292407, ClinicalTrials.gov,
-            Sanofi/Regeneron PRs, KBR, BioSpectrum Asia.<br><br>
-            <span style='color:#64748b;'>Last updated: June 2026</span>
-        </div>
+    <div style='padding:10px 0; border-top:1px solid #334155; font-size:10px; color:#475569; line-height:1.6;'>
+        Data sources: FDA BLA 761055, Health Canada PM 292407, ClinicalTrials.gov,
+        Sanofi/Regeneron PRs, KBR, BioSpectrum Asia.<br><br>
+        <span style='color:#64748b;'>Last updated: June 2026</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1387,16 +1405,22 @@ elif "Market" in page:
             "KyongBo": [1, 1, 2, 1, 2],
         }
         colors_radar = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444"]
+        fill_rgba = [
+            "rgba(16,185,129,0.10)",
+            "rgba(59,130,246,0.10)",
+            "rgba(245,158,11,0.10)",
+            "rgba(239,68,68,0.10)",
+        ]
 
         fig5 = go.Figure()
-        for (company, vals), color in zip(scores.items(), colors_radar):
+        for (company, vals), color, fcolor in zip(scores.items(), colors_radar, fill_rgba):
             fig5.add_trace(go.Scatterpolar(
                 r=vals + [vals[0]],
                 theta=categories + [categories[0]],
                 fill="toself",
                 name=company,
                 line_color=color,
-                fillcolor=color.replace("#", "rgba(") + ",0.08)",
+                fillcolor=fcolor,
                 opacity=0.85,
             ))
         fig5.update_layout(
