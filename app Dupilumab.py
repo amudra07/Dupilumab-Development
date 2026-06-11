@@ -1,8 +1,20 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
-import plotly.express as px
 from pathlib import Path
+
+try:
+    import plotly.graph_objects as go
+    import plotly.express as px
+    PLOTLY_OK = True
+except ModuleNotFoundError:
+    PLOTLY_OK = False
+    st.error(
+        "⚠️ **Missing dependency: plotly**\n\n"
+        "Please ensure your `requirements.txt` contains `plotly>=5.18.0` "
+        "and redeploy the app on Streamlit Cloud.\n\n"
+        "Locally: `pip install plotly`"
+    )
+    st.stop()
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
