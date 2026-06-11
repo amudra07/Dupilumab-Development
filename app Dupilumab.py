@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
+# Resolve assets folder relative to this script — works locally AND on Streamlit Cloud
+ASSETS = Path(__file__).parent / "assets"
+
 try:
     import plotly.graph_objects as go
     import plotly.express as px
@@ -385,9 +388,11 @@ if "Overview" in page:
                 Receptor-level blockade: Type I and Type II
             </div>
         """, unsafe_allow_html=True)
-        img_path1 = Path("/home/claude/dupilumab_app/assets/moa_receptor.png")
+        img_path1 = ASSETS / "moa_receptor.png"
         if img_path1.exists():
             st.image(str(img_path1), use_container_width=True)
+        else:
+            st.warning(f"Image not found: {img_path1}")
         st.markdown("""
             <div style='font-size:12px; color:#475569; line-height:1.6; margin-top:10px;'>
                 Dupilumab binds the <strong>IL-4Rα subunit</strong> — the shared component of both:
@@ -413,9 +418,11 @@ if "Overview" in page:
                 Downstream pathway effects of IL-4Rα blockade
             </div>
         """, unsafe_allow_html=True)
-        img_path2 = Path("/home/claude/dupilumab_app/assets/moa_pathway.png")
+        img_path2 = ASSETS / "moa_pathway.png"
         if img_path2.exists():
             st.image(str(img_path2), use_container_width=True)
+        else:
+            st.warning(f"Image not found: {img_path2}")
         st.markdown("""
             <div style='font-size:12px; color:#475569; line-height:1.6; margin-top:10px;'>
                 Blocking IL-4Rα interrupts the entire type 2 inflammatory cascade:
@@ -494,9 +501,11 @@ elif "Detailed" in page:
     with tab1:
         st.markdown('<div class="slider-header">Formulation Data — All Strengths (Dupixent® Pre-filled Syringe)</div>', unsafe_allow_html=True)
 
-        img_path3 = Path("/home/claude/dupilumab_app/assets/formulation_table.png")
+        img_path3 = ASSETS / "formulation_table.png"
         if img_path3.exists():
             st.image(str(img_path3), caption="Formulation reference table — source: Health Canada PM Control No. 292407", use_container_width=True)
+        else:
+            st.warning(f"Image not found: {img_path3}")
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<p class="section-head">Quantitative Formulation Comparison</p>', unsafe_allow_html=True)
