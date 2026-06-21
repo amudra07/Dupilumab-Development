@@ -488,11 +488,12 @@ if "Overview" in page:
 elif "Detailed" in page:
 
     st.markdown('<p class="page-title">Detailed Drug Information</p>', unsafe_allow_html=True)
-    st.markdown('<p class="page-sub">Formulation · Clinical Trials · Comparator Medications · Korean Market Activity</p>', unsafe_allow_html=True)
+    st.markdown('<p class="page-sub">Formulation · Clinical Trials · PK Study Survey · Comparator Medications · Korean Market Activity</p>', unsafe_allow_html=True)
 
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab2b, tab3, tab4 = st.tabs([
         "💊  Formulation & Excipients",
         "🔬  Clinical Trial Programme",
+        "💉  PK Study Survey",
         "⚖️  Comparator Medications",
         "🇰🇷  Korean Biosimilar Activity"
     ])
@@ -701,6 +702,235 @@ elif "Detailed" in page:
                     <a href='{row['Reference']}' target='_blank'>🔗 {row['Reference']}</a>
                 </div>
                 """, unsafe_allow_html=True)
+
+    # ── TAB 2B: PK STUDY SURVEY ──────────────────────────────────────────────
+    with tab2b:
+        st.markdown('<div class="slider-header">PK Study Survey — Test Article, Species, Route, Dose & Linearity by Study</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div style='font-size:13px; color:#374151; line-height:1.7; margin-bottom:14px;'>
+            Oriented to what a PK scientist needs when scoping a study: test article (dupilumab vs. species surrogate),
+            target-binding status by species, route, dose range, regimen, duration, the PK question each study was built
+            to answer, and linearity / TMDD behaviour. Established parameter values are verified against the EMA assessment
+            report full text; per-study clinical PK read-outs are <em>not</em> reproduced where the surveyed source did not contain them.
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ── Established human PK parameters ──
+        st.markdown('<p class="section-head">Established Dupilumab PK Parameters (Human)</p>', unsafe_allow_html=True)
+
+        pk_params = [
+            ("SC bioavailability (F)", "61% (asthma Pop-PK model)"),
+            ("Absorption rate constant (ka)", "0.260 / day"),
+            ("Median tmax (SC)", "3–7 days"),
+            ("Central volume of distribution (V2)", "4.37 L"),
+            ("Linear clearance (CL)", "0.115 L/day"),
+            ("Elimination", "Non-linear, target-mediated disposition (TMDD); linear pathway dominates at high conc."),
+            ("Dose proportionality", "Greater-than-dose-proportional; 200→300 mg Q2W raised Wk16 trough 2.06-fold (29.2→60.3 mg/L)"),
+            ("Time to steady state", "6 wk (200 mg Q2W + 400 mg load); 8 wk (300 mg Q2W + 600 mg load)"),
+            ("Washout (to <LLOQ 0.078 mg/L)", "9 wk (200 mg Q2W); 11 wk (300 mg Q2W)"),
+            ("Primary PK covariate", "Body weight (range studied 32–186 kg)"),
+            ("IIV (Fsc / Ke / V2 / Vm)", "36.3% / 19.6% / 9.13% / 24.3%"),
+            ("ADA effect on PK", "Higher Ke / lower exposure in persistently ADA-positive patients"),
+        ]
+
+        cols = st.columns(4)
+        for i, (name, val) in enumerate(pk_params):
+            with cols[i % 4]:
+                st.markdown(f"""
+                <div class='card' style='padding:12px 13px; min-height:128px; position:relative;'>
+                    <span style='position:absolute; top:10px; right:11px; font-size:9px; font-weight:700;
+                                  color:#0f766e; background:#f0fdfa; border:1px solid #99f6e4;
+                                  border-radius:5px; padding:1px 5px;'>✓ EMA</span>
+                    <p style='font-size:10.5px; letter-spacing:0.04em; text-transform:uppercase; color:#64748b;
+                              font-weight:600; margin:0 0 5px;'>{name}</p>
+                    <p style='font-size:12.5px; color:#1e293b; font-weight:500; line-height:1.4; margin:0;'>{val}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class='source-box' style='margin-top:4px;'>
+            Human values are from the <strong>asthma population-PK model</strong> in the EMA report; the AD-pooled model
+            gives close but not identical figures (e.g. Vd ~4.8 L, F 61–64%). Use the indication-matched model for your
+            own simulations. ·
+            <a href='https://www.ema.europa.eu/en/documents/variation-report/dupixent-h-c-4390-x-0004-g-epar-assessment-report-extension_en.pdf' target='_blank'>EMA assessment report (PDF)</a>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── PK study survey table ──
+        st.markdown('<p class="section-head">PK Study Survey — Nonclinical, Clinical PK & Population PK</p>', unsafe_allow_html=True)
+
+        pk_studies = [
+            ("Nonclinical", "In vitro binding & potency", True, "Dupilumab; REGN646; REGN1103",
+             "CHO / PBMC / Ramos cell lines; human, monkey, mouse", "—", "—", "—",
+             "Human IL-4Rα KD 12 pM. Dupilumab STAT6 IC50 25 pM (IL-4) / 27 pM (IL-13). REGN1103 IC50 1.9 nM (IL-4) / 11 pM (IL-13). No ADCC/CDC (IgG4).",
+             "n/a", "https://www.ema.europa.eu/en/documents/variation-report/dupixent-h-c-4390-x-0004-g-epar-assessment-report-extension_en.pdf"),
+            ("Nonclinical", "Single-dose PK — rat", True, "Dupilumab",
+             "Rat (no high-affinity target binding)", "IV & SC", "Single dose", "—",
+             "t½ 4.8–7 d; SC bioavailability 84.2%; qualified ELISA. Linear (no TMDD).",
+             "Linear", "https://www.ema.europa.eu/en/documents/variation-report/dupixent-h-c-4390-x-0004-g-epar-assessment-report-extension_en.pdf"),
+            ("Nonclinical", "Single-dose PK — cynomolgus", True, "Dupilumab",
+             "Cynomolgus monkey (low-affinity binding)", "IV & SC", "Single dose", "—",
+             "t½ 11.7–20.5 d; SC bioavailability >92%; qualified ELISA. Linear, ~dose-proportional total exposure.",
+             "Linear", "https://www.ema.europa.eu/en/documents/variation-report/dupixent-h-c-4390-x-0004-g-epar-assessment-report-extension_en.pdf"),
+            ("Nonclinical", "PK/TK — cynomolgus (surrogate)", True, "REGN646 (anti-monkey IL-4Rα)",
+             "Cynomolgus monkey", "IV & SC; single & repeat", "Single 1–15 mg/kg; repeat 25 & 100 mg/kg/wk", "Up to 26 wk (repeat-dose)",
+             "Non-linear TMDD: Cmax ~dose-prop, AUCinf >dose-prop. β-t½ 7.2–9.1 d; terminal t½ 1.5–2.1 d; absolute SC F ~70%; accumulation 2.2–4.6-fold weekly. Validated ELISA; bridging ECL for ADA.",
+             "Non-linear (TMDD)", "https://www.ema.europa.eu/en/documents/variation-report/dupixent-h-c-4390-x-0004-g-epar-assessment-report-extension_en.pdf"),
+            ("Nonclinical", "TK — mouse (surrogate)", True, "REGN1103 (anti-mouse IL-4Rα)",
+             "Mouse", "SC", "≥25 mg/kg/wk range", "—",
+             "Non-linear: >dose-proportional at low doses, ~dose-proportional at ≥25 mg/kg/wk. Validated ELISA.",
+             "Non-linear", "https://www.ema.europa.eu/en/documents/variation-report/dupixent-h-c-4390-x-0004-g-epar-assessment-report-extension_en.pdf"),
+            ("Clinical PK", "FIH SAD/MAD (NCT01259323)", False, "Dupilumab",
+             "Healthy volunteers + AD adults; N≈50", "IV / SC", "75–600 mg SAD", "Up to 12 wk",
+             "First-in-human safety; Cmax, AUC, t½; PD biomarkers (IgE, TARC). [per-subject PK values not in surveyed source]",
+             "—", "https://clinicaltrials.gov/study/NCT01259323"),
+            ("Clinical PK", "Multiple-dose PK (NCT01385657)", False, "Dupilumab",
+             "AD adults; N≈30", "SC", "75–300 mg, multiple doses", "12 wk",
+             "Steady-state PK; SC bioavailability; target-mediated clearance characterization.",
+             "Non-linear (TMDD)", "https://clinicaltrials.gov/study/NCT01385657"),
+            ("Clinical PK", "SC dose PK comparability (NCT01639040)", False, "Dupilumab",
+             "AD adults; N≈30", "SC (vs IV ref)", "Various dose levels", "12 wk",
+             "Dose-proportionality; SC vs IV PK comparison.",
+             "—", "https://clinicaltrials.gov/study/NCT01639040"),
+            ("Clinical PK", "Device comparability: AI vs PFS-S (Cohen 2022)", False, "Dupilumab",
+             "Healthy volunteers; N=130 (128 evaluable); parallel", "SC", "200 mg single dose", "~11 wk",
+             "Cmax & AUClast comparability, autoinjector vs prefilled-syringe-with-safety.",
+             "—", "https://pubmed.ncbi.nlm.nih.gov/35278283/"),
+            ("Clinical PK", "Drug-product comparability (NCT05976386)", False, "Dupilumab",
+             "Healthy volunteers; N=182", "SC", "Single dose; new DP vs current DP", "Up to 11 wk",
+             "PK comparability (Cmax, AUC) new vs reference drug product.",
+             "—", "https://clinicaltrials.gov/study/NCT05976386"),
+            ("Clinical PK", "DDI / CYP450 probe (NCT02612155)", False, "Dupilumab",
+             "AD adults; N≈12–13", "SC", "600 mg load → 300 mg QW × 6 wk", "~9 wk",
+             "Effect of dupilumab on CYP1A2/2C9/2C19/2D6/3A probe substrates. EMA: no clinically relevant CYP effect.",
+             "—", "https://clinicaltrials.gov/study/NCT02612155"),
+            ("Pop-PK", "Population PK — adults & adolescents", True, "Dupilumab",
+             "Pooled Ph2/3; healthy + patients; N=thousands", "SC (all approved regimens)", "All approved regimens", "Pooled across trials",
+             "2-compartment, parallel linear + non-linear (TMDD) elimination, 1st-order absorption. F 61%; V2 4.37 L; CL 0.115 L/d; body weight primary covariate.",
+             "Non-linear (TMDD)", "https://www.ema.europa.eu/en/documents/variation-report/dupixent-h-c-4390-x-0004-g-epar-assessment-report-extension_en.pdf"),
+            ("Pop-PK", "Pediatric Pop-PK — dose-selection sims (6 mo–11 yr)", False, "Dupilumab",
+             "Pediatric (AD-1652, AD-1539, VOYAGE, EoE KIDS); model-based", "SC", "Weight-based 100–300 mg Q2W/Q4W", "Model-based",
+             "Predict steady-state Ctrough to justify weight-banded pediatric dosing.",
+             "Non-linear (TMDD)", "https://pdf.hres.ca/dpd_pm/00082261.PDF"),
+        ]
+
+        df_pk = pd.DataFrame(pk_studies, columns=[
+            "Scope", "Study", "EMA Verified", "Test Article", "Species / Population",
+            "Route", "Dose / Regimen", "Duration", "PK Question Addressed", "Linearity", "Reference"
+        ])
+
+        scope_filter = st.multiselect(
+            "Filter by scope",
+            ["Nonclinical", "Clinical PK", "Pop-PK"],
+            default=[],
+            placeholder="All scopes",
+            key="pk_scope_filter"
+        )
+        filtered_pk = df_pk.copy()
+        if scope_filter:
+            filtered_pk = filtered_pk[filtered_pk["Scope"].isin(scope_filter)]
+
+        st.markdown(f"**Showing {len(filtered_pk)} of {len(df_pk)} studies**")
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        scope_color = {"Nonclinical": "#fef3c7|#b45309", "Clinical PK": "#dbeafe|#0e7490", "Pop-PK": "#ede9fe|#4338ca"}
+        lin_color = {
+            "Linear": "#dbeafe|#1d4ed8",
+            "Non-linear": "#ffedd5|#9a3412",
+            "Non-linear (TMDD)": "#ffedd5|#9a3412",
+            "n/a": "#f1f5f9|#94a3b8",
+            "—": "#f1f5f9|#94a3b8",
+        }
+
+        for _, row in filtered_pk.iterrows():
+            sc_bg, sc_color = scope_color.get(row["Scope"], "#f1f5f9|#475569").split("|")
+            li_bg, li_color = lin_color.get(row["Linearity"], "#f1f5f9|#475569").split("|")
+            prov_badge = (
+                "<span style='font-size:9.5px;font-weight:700;border-radius:5px;padding:2px 6px;"
+                "color:#0f766e;background:#f0fdfa;border:1px solid #99f6e4;'>✓ EMA verified</span>"
+                if row["EMA Verified"] else
+                "<span style='font-size:9.5px;font-weight:700;border-radius:5px;padding:2px 6px;"
+                "color:#92400e;background:#fffbeb;border:1px solid #fde68a;' "
+                "title='Study design from dashboard source; per-study PK values not in that source and not fabricated'>◑ Design only</span>"
+            )
+
+            with st.expander(f"**{row['Study']}** — {row['Test Article']}"):
+                c1, c2, c3 = st.columns(3)
+                with c1:
+                    st.markdown(f"""
+                    <span style='background:{sc_bg};color:{sc_color};font-size:11px;font-weight:600;
+                                  padding:3px 9px;border-radius:12px;'>{row['Scope']}</span>
+                    &nbsp;{prov_badge}
+                    <div style='margin-top:10px;font-size:12px;color:#64748b;'>Test article</div>
+                    <div style='font-size:13px;color:#1e293b;font-weight:500;'>{row['Test Article']}</div>
+                    """, unsafe_allow_html=True)
+                with c2:
+                    st.markdown(f"""
+                    <div style='font-size:12px;color:#64748b;'>Species / population</div>
+                    <div style='font-size:13px;color:#1e293b;margin-bottom:8px;'>{row['Species / Population']}</div>
+                    <div style='font-size:12px;color:#64748b;'>Route</div>
+                    <div style='font-size:13px;color:#1e293b;'>{row['Route']}</div>
+                    """, unsafe_allow_html=True)
+                with c3:
+                    st.markdown(f"""
+                    <div style='font-size:12px;color:#64748b;'>Dose / regimen</div>
+                    <div style='font-size:13px;color:#1e293b;margin-bottom:8px;'>{row['Dose / Regimen']}</div>
+                    <div style='font-size:12px;color:#64748b;'>Duration</div>
+                    <div style='font-size:13px;color:#1e293b;'>{row['Duration']}</div>
+                    """, unsafe_allow_html=True)
+
+                st.markdown(f"""
+                <div style='background:#f8fafc;border-radius:8px;padding:10px 14px;margin-top:8px;'>
+                    <span style='font-size:11px;color:#64748b;font-weight:600;'>PK QUESTION ADDRESSED</span>
+                    <p style='font-size:13px;color:#1e293b;margin:4px 0 0;'>{row['PK Question Addressed']}</p>
+                    <span style='display:inline-block;margin-top:8px;font-size:10px;font-weight:700;
+                                  border-radius:5px;padding:2px 6px;background:{li_bg};color:{li_color};'>
+                        Linearity: {row['Linearity']}
+                    </span>
+                </div>
+                <div class='source-box' style='margin-top:8px;'>
+                    <a href='{row['Reference']}' target='_blank'>🔗 {row['Reference']}</a>
+                </div>
+                """, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ── Legend ──
+        st.markdown("""
+        <div style='display:flex; gap:16px; flex-wrap:wrap; font-size:11px; color:#64748b; margin-bottom:6px;'>
+            <span>🟦 Dupilumab (clinical molecule)</span>
+            <span>🟪 Species surrogate (REGN646 / REGN1103)</span>
+            <span>✓ EMA-verified values</span>
+            <span>◑ Design only (no PK read-out in source)</span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ── Design-relevant takeaways ──
+        st.markdown('<p class="section-head" style="margin-top:16px;">Design-Relevant Takeaways for a PK Survey</p>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class='card card-purple'>
+            <p style='font-size:13px; color:#1e293b; line-height:1.7; margin:0;'>
+                Dupilumab does not bind rodent IL-4Rα and binds cynomolgus IL-4Rα only weakly — so nonclinical
+                <strong>tox/PD</strong> used species surrogates (REGN646 in monkey, REGN1103 in mouse), while dupilumab
+                itself was used only for <strong>single-dose PK</strong> in rat/monkey (linear, no TMDD) and for efficacy
+                in <strong>humanised/transgenic</strong> mice. In humans, dupilumab shows <strong>non-linear,
+                target-mediated disposition</strong>: pick a model with parallel linear + saturable clearance, plan for
+                greater-than-dose-proportional exposure, build in body weight as the primary covariate, and allow
+                6–8 wk to steady state and 9–11 wk washout. Device/drug-product comparability studies used single
+                200 mg SC in healthy volunteers (~11 wk).
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class='note-box' style='margin-top:10px;'>
+            <strong>Provenance:</strong> parameter values and nonclinical PK marked ✓ are from the EMA assessment report
+            (EMEA/H/C/004390/X/0004/G). Clinical study rows marked ◑ give design fields taken from the survey source;
+            individual-study Cmax/AUC/t½ were not in that source and have not been added here.
+        </div>
+        """, unsafe_allow_html=True)
 
     # ── TAB 3: COMPARATOR MEDICATIONS ────────────────────────────────────────
     with tab3:
