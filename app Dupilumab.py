@@ -238,6 +238,7 @@ with st.sidebar:
         "NAVIGATION",
         [
             "🏠  Overview & Drug Profile",
+            "🧪  Technology Landscape",
             "📋  Detailed Information",
             "🌍  Market Research",
         ],
@@ -489,20 +490,38 @@ if "Overview" in page:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# PAGE 2 — DETAILED INFORMATION (Slider-style tabs)
+# PAGE 2 — TECHNOLOGY LANDSCAPE
+# ═══════════════════════════════════════════════════════════════════════════════
+elif "Technology Landscape" in page:
+
+    st.markdown('<p class="page-title">High-Concentration SC Delivery — Technology Landscape</p>', unsafe_allow_html=True)
+    st.markdown('<p class="page-sub">Benchmarking Dupixent and our internal platform against tracked competitor technologies</p>', unsafe_allow_html=True)
+
+    if TECH_LANDSCAPE_OK:
+        render_technology_landscape_tab()
+    else:
+        st.error(
+            "⚠️ **Missing file: tech_landscape_tab.py**\n\n"
+            "Upload `tech_landscape_tab.py` and `tech_landscape_data.py` to the same "
+            "folder as this app file, then redeploy."
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PAGE 3 — DETAILED INFORMATION (Slider-style tabs)
 # ═══════════════════════════════════════════════════════════════════════════════
 elif "Detailed" in page:
 
     st.markdown('<p class="page-title">Detailed Drug Information</p>', unsafe_allow_html=True)
     st.markdown('<p class="page-sub">Formulation · Clinical Trials · PK Study Survey · Comparator Medications · Korean Market Activity</p>', unsafe_allow_html=True)
 
-    tab1, tab2, tab2b, tab3, tab4, tab5 = st.tabs([
+
+    tab1, tab2, tab2b, tab3, tab4 = st.tabs([
         "💊  Formulation & Excipients",
         "🔬  Clinical Trial Programme",
         "💉  PK Study Survey",
         "⚖️  Comparator Medications",
-        "🇰🇷  Korean Biosimilar Activity",
-        "🧪  Technology Landscape"
+        "🇰🇷  Korean Biosimilar Activity"
     ])
 
     # ── TAB 1: FORMULATION ────────────────────────────────────────────────────
@@ -1348,17 +1367,6 @@ elif "Detailed" in page:
             </div>
         </div>
         """, unsafe_allow_html=True)
-
-    # ── TAB 5: TECHNOLOGY LANDSCAPE ──────────────────────────────────────────
-    with tab5:
-        if TECH_LANDSCAPE_OK:
-            render_technology_landscape_tab()
-        else:
-            st.error(
-                "⚠️ **Missing file: tech_landscape_tab.py**\n\n"
-                "Upload `tech_landscape_tab.py` and `tech_landscape_data.py` to the same "
-                "folder as this app file, then redeploy."
-            )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
