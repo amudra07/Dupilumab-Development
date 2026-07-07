@@ -19,6 +19,12 @@ except ModuleNotFoundError:
     )
     st.stop()
 
+try:
+    from tech_landscape_tab import render_technology_landscape_tab
+    TECH_LANDSCAPE_OK = True
+except ModuleNotFoundError:
+    TECH_LANDSCAPE_OK = False
+
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Dupilumab Intelligence Dashboard",
@@ -490,12 +496,13 @@ elif "Detailed" in page:
     st.markdown('<p class="page-title">Detailed Drug Information</p>', unsafe_allow_html=True)
     st.markdown('<p class="page-sub">Formulation · Clinical Trials · PK Study Survey · Comparator Medications · Korean Market Activity</p>', unsafe_allow_html=True)
 
-    tab1, tab2, tab2b, tab3, tab4 = st.tabs([
+    tab1, tab2, tab2b, tab3, tab4, tab5 = st.tabs([
         "💊  Formulation & Excipients",
         "🔬  Clinical Trial Programme",
         "💉  PK Study Survey",
         "⚖️  Comparator Medications",
-        "🇰🇷  Korean Biosimilar Activity"
+        "🇰🇷  Korean Biosimilar Activity",
+        "🧪  Technology Landscape"
     ])
 
     # ── TAB 1: FORMULATION ────────────────────────────────────────────────────
@@ -1341,6 +1348,17 @@ elif "Detailed" in page:
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+    # ── TAB 5: TECHNOLOGY LANDSCAPE ──────────────────────────────────────────
+    with tab5:
+        if TECH_LANDSCAPE_OK:
+            render_technology_landscape_tab()
+        else:
+            st.error(
+                "⚠️ **Missing file: tech_landscape_tab.py**\n\n"
+                "Upload `tech_landscape_tab.py` and `tech_landscape_data.py` to the same "
+                "folder as this app file, then redeploy."
+            )
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
