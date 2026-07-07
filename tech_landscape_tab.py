@@ -61,11 +61,16 @@ def _positioning_chart():
     plotted = entries_with_concentration()
 
     # ── Collision avoidance ──────────────────────────────────────────────────
-    # Multiple entries can share the same (stage, concentration) coordinate
-    # (e.g. two "Preclinical" platforms both at 400 mg/mL), which stacks both
-    # markers and text labels exactly on top of each other and makes them
-    # unreadable. Detect these groups and spread them horizontally with a
-    # small deterministic offset, alternating label position top/bottom.
+    # Multiple entries can share the same (stage, concentration) coordinate.
+    # A small data-space x-offset alone isn't reliable — at this axis scale a
+    # few tenths of a "stage unit" can still be only a few pixels wide, which
+    # isn't enough room for a long label string. So: (1) spread overlapping
+    # markers apart in data-space by a larger margin, AND (2) place each
+    # label as a separate pixel-offset annotation (not marker-anchored text),
+    # with distinct left/right + stacked vertical offsets per cluster member,
+    # plus a thin connector line so it's still clear which label belongs to
+    # which point. Pixel offsets aren't squeezed by axis scale, so this holds
+    # regardless of zoom or how long the label text is.
     from collections import defaultdict
     groups = defaultdict(list)
     for e in plotted:
@@ -73,18 +78,23 @@ def _positioning_chart():
         groups[key].append(e)
 
     x_offset = {}
-    text_pos = {}
+    label_ax = {}
+    label_ay = {}
     for key, members in groups.items():
         n = len(members)
         if n == 1:
             x_offset[members[0]["id"]] = 0.0
-            text_pos[members[0]["id"]] = "top center"
+            label_ax[members[0]["id"]] = 0
+            label_ay[members[0]["id"]] = -32
             continue
-        spread = 0.22
-        start = -spread * (n - 1) / 2
+        data_spread = 0.4
+        start = -data_spread * (n - 1) / 2
         for i, m in enumerate(members):
-            x_offset[m["id"]] = start + i * spread
-            text_pos[m["id"]] = "top center" if i % 2 == 0 else "bottom center"
+            x_offset[m["id"]] = start + i * data_spread
+            # alternate left/right in pixel space, stack vertically so even
+            # long strings clear each other and their own marker
+            label_ax[m["id"]] = -85 if i % 2 == 0 else 85
+            label_ay[m["id"]] = -30 - (i // 2) * 24
 
     by_category = {}
     for e in plotted:
@@ -95,18 +105,31 @@ def _positioning_chart():
         fig.add_trace(go.Scatter(
             x=[STAGE_X.get(e["phase"], 1.2) + x_offset[e["id"]] for e in items],
             y=[e["concentration_mgml"] for e in items],
-            mode="markers+text",
+            mode="markers",
             name=category,
-            text=[e["name"] for e in items],
-            textposition=[text_pos[e["id"]] for e in items],
-            textfont={"size": 10, "color": "#475569"},
             marker={
                 "size": [22 if e["id"] == "our_platform" else 15 for e in items],
                 "color": CATEGORY_COLOR.get(category, "#94a3b8"),
                 "line": {"width": 2, "color": "white"},
             },
+            text=[e["name"] for e in items],
             hovertemplate="<b>%{text}</b><br>%{y} mg/mL<extra></extra>",
         ))
+
+    for e in plotted:
+        fig.add_annotation(
+            x=STAGE_X.get(e["phase"], 1.2) + x_offset[e["id"]],
+            y=e["concentration_mgml"],
+            text=e["name"],
+            showarrow=True,
+            arrowhead=0,
+            arrowwidth=1,
+            arrowcolor="#cbd5e1",
+            ax=label_ax[e["id"]],
+            ay=label_ay[e["id"]],
+            font={"size": 10, "color": "#475569"},
+            bgcolor="rgba(255,255,255,0.85)",
+        )
 
     fig.update_layout(
         title={"text": "Concentration vs. development stage — all tracked technologies", "font": {"size": 14}},
@@ -118,9 +141,9 @@ def _positioning_chart():
             "range": [-0.6, 4.4],
             "gridcolor": "#f1f5f9",
         },
-        yaxis={"title": "Concentration (mg/mL)", "range": [0, 720], "gridcolor": "#f1f5f9"},
-        height=460,
-        margin={"t": 50, "b": 70},
+        yaxis={"title": "Concentration (mg/mL)", "range": [0, 750], "gridcolor": "#f1f5f9"},
+        height=520,
+        margin={"t": 50, "b": 70, "l": 60, "r": 40},
         plot_bgcolor="white",
         paper_bgcolor="white",
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.08, "x": 0},
