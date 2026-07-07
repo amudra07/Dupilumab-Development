@@ -59,6 +59,33 @@ PHASE_BADGE = {
 
 def _positioning_chart():
     plotted = entries_with_concentration()
+
+    # ── Collision avoidance ──────────────────────────────────────────────────
+    # Multiple entries can share the same (stage, concentration) coordinate
+    # (e.g. two "Preclinical" platforms both at 400 mg/mL), which stacks both
+    # markers and text labels exactly on top of each other and makes them
+    # unreadable. Detect these groups and spread them horizontally with a
+    # small deterministic offset, alternating label position top/bottom.
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for e in plotted:
+        key = (round(STAGE_X.get(e["phase"], 1.2), 2), e["concentration_mgml"])
+        groups[key].append(e)
+
+    x_offset = {}
+    text_pos = {}
+    for key, members in groups.items():
+        n = len(members)
+        if n == 1:
+            x_offset[members[0]["id"]] = 0.0
+            text_pos[members[0]["id"]] = "top center"
+            continue
+        spread = 0.22
+        start = -spread * (n - 1) / 2
+        for i, m in enumerate(members):
+            x_offset[m["id"]] = start + i * spread
+            text_pos[m["id"]] = "top center" if i % 2 == 0 else "bottom center"
+
     by_category = {}
     for e in plotted:
         by_category.setdefault(e["category"], []).append(e)
@@ -66,12 +93,12 @@ def _positioning_chart():
     fig = go.Figure()
     for category, items in by_category.items():
         fig.add_trace(go.Scatter(
-            x=[STAGE_X.get(e["phase"], 1.2) for e in items],
+            x=[STAGE_X.get(e["phase"], 1.2) + x_offset[e["id"]] for e in items],
             y=[e["concentration_mgml"] for e in items],
             mode="markers+text",
             name=category,
             text=[e["name"] for e in items],
-            textposition="top center",
+            textposition=[text_pos[e["id"]] for e in items],
             textfont={"size": 10, "color": "#475569"},
             marker={
                 "size": [22 if e["id"] == "our_platform" else 15 for e in items],
@@ -88,11 +115,11 @@ def _positioning_chart():
             "tickmode": "array",
             "tickvals": STAGE_TICKS,
             "ticktext": STAGE_LABELS,
-            "range": [-0.4, 4.2],
+            "range": [-0.6, 4.4],
             "gridcolor": "#f1f5f9",
         },
-        yaxis={"title": "Concentration (mg/mL)", "range": [0, 680], "gridcolor": "#f1f5f9"},
-        height=440,
+        yaxis={"title": "Concentration (mg/mL)", "range": [0, 720], "gridcolor": "#f1f5f9"},
+        height=460,
         margin={"t": 50, "b": 70},
         plot_bgcolor="white",
         paper_bgcolor="white",
@@ -102,10 +129,6 @@ def _positioning_chart():
 
 
 def render_technology_landscape_tab():
-    st.markdown(
-        '<div class="slider-header">High-Concentration SC Delivery — Technology Landscape</div>',
-        unsafe_allow_html=True,
-    )
     st.markdown(f"""
     <div style='font-size:13px; color:#374151; line-height:1.7; margin-bottom:14px;'>
         Benchmarks Dupixent and our internal platform against {len(ENTRIES)} tracked high-concentration
